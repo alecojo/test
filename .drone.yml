@@ -6,4 +6,4 @@ steps:
   - name: "Costruzione immagine Docker"
     image: docker:stable-dind
     commands:
-      - docker build -t devops-learning:latest .
+      - docker build -t test:latest .
