@@ -3,8 +3,17 @@ type: docker
 name: default
 
 steps:
-- name: test
-  image: golang
-  commands:
-  - go build
-  - go test
+  - name: "Esecuzione script iniziale"
+    image: alpine:latest
+    commands:
+      - echo "Avvio della pipeline con test..."
+  
+  - name: "Installazione dipendenze Python"
+    image: python:3.9-alpine
+    commands:
+      - pip install --no-cache-dir unittest2  # Install the required dependencies
+
+  - name: "Esecuzione test Python"
+    image: python:3.9-alpine
+    commands:
+      - python -m unittest discover -s tests  # Run the tests located in the 'tests' directory
