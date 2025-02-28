@@ -5,5 +5,7 @@ name: build
 steps:
   - name: "Costruzione immagine Docker"
     image: docker:stable-dind
+    privileged: true
     commands:
       - docker build -t test:latest .
+
