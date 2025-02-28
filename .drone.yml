@@ -2,7 +2,7 @@ kind: pipeline
 type: docker
 name: default
 steps:
- - name: "Esecuzione script base"
-   image: alpine:latest
-   commands:
- - echo "Eseguendo pipeline CI di base..."
+  - name: "Esecuzione script base"
+    image: alpine:latest
+    commands:
+      - echo "Eseguendo pipeline CI di base..."
