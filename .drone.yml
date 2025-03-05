@@ -4,14 +4,13 @@ name: build
 
 steps:
   - name: costruzione-immagine
-    image: docker:latest
-    volumes:
-      - name: docker-socket
-        path: /var/run/docker.sock
+    image: gcr.io/kaniko-project/executor:latest
+    environment:
+      DOCKER_CONFIG: "/kaniko/.docker"
     commands:
-      - docker build -t test:latest .
-
-volumes:
-  - name: docker-socket
-    host:
-      path: /var/run/docker.sock
+      - mkdir -p /kaniko/.docker
+      - echo "{\"auths\":{}}" > /kaniko/.docker/config.json
+      - /kaniko/executor
+        --context=.
+        --dockerfile=Dockerfile
+        --destination=test:latest
