@@ -1,14 +1,12 @@
 kind: pipeline
 type: docker
-name: default
-steps:
-  - name: "Esecuzione script iniziale"
-    image: alpine:latest
-    commands:
-      - echo "Avvio della pipeline con test..."
+name: build
 
-  - name: "Esecuzione test Python"
-    image: python:3.9-alpine
+steps:
+  - name: "Costruzione immagine Docker"
+    image: docker:stable-dind
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock  # Usa il socket Docker della macchina host
     commands:
-      - pip install unittest2  # oppure le dipendenze necessarie
-      - python -m unittest discover tests
+      - docker build -t devops-learning:latest .
