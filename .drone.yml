@@ -1,12 +1,24 @@
 kind: pipeline
 type: docker
-name: build
+name: default
 
 steps:
-  - name: "Costruzione immagine Docker"
-    image: docker:stable-dind
-    volumes:
-      - name: dockersock
-        path: /var/run/docker.sock  # Usa il socket Docker della macchina host
+  - name: build
+    image: docker:latest
     commands:
       - docker build -t test .
+    volumes:
+      - name: docker-socket
+        path: /var/run/docker.sock
+    when:
+      branch: main
+
+services:
+  - name: dind
+    image: docker:dind
+    privileged: true
+
+volumes:
+  - name: docker-socket
+    host:
+      path: /var/run/docker.sock
