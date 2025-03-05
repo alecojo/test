@@ -3,7 +3,8 @@ type: docker
 name: build
 
 steps:
-  - name: "Costruzione immagine Docker"
-    image: docker:stable-dind
+  - name: costruzione-immagine
+    image: docker
+    privileged: true
     commands:
       - docker build -t test:latest .
