@@ -1,0 +1,14 @@
+kind: pipeline
+type: docker
+name: default
+steps:
+  - name: "Esecuzione script iniziale"
+    image: alpine:latest
+    commands:
+      - echo "Avvio della pipeline con test..."
+
+  - name: "Esecuzione test Python"
+    image: python:3.9-alpine
+    commands:
+      - pip install unittest2  # oppure le dipendenze necessarie
+      - python -m unittest discover tests
