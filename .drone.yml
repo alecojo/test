@@ -9,4 +9,4 @@ steps:
       - name: dockersock
         path: /var/run/docker.sock  # Usa il socket Docker della macchina host
     commands:
-      - docker build -t devops-learning:latest .
+      - docker build -t test .
