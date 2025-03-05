@@ -5,9 +5,12 @@ name: build
 services:
   - name: docker
     image: docker:dind
+    privileged: true  # Importante per l'accesso al Docker daemon
+    environment:
+      DOCKER_TLS_CERTDIR: "/certs"  # Configurazione di sicurezza per DinD
 
 steps:
   - name: costruzione-immagine
-    image: docker
+    image: docker:latest  # Usa l'immagine Docker standard per il build
     commands:
       - docker build -t test:latest .
