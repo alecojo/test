@@ -1,9 +1,12 @@
 kind: pipeline
-type: docker
-name: build
+name: default
 
 steps:
-  - name: "Costruzione immagine Docker"
-    image: docker:cli
-    commands:
-      - docker build -t test:latest .
+- name: docker  
+  image: plugins/docker
+  settings:
+    username: kevinbacon
+    password: pa55word
+    repo: foo/bar
+    tags:
+    - latest
