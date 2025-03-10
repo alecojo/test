@@ -2,14 +2,29 @@ kind: pipeline
 type: docker
 name: build
 
+volumes:
+  - name: docker_certs
+    temp: {}  # Volume temporaneo per i certificati TLS
+
 services:
-  - name: docker
+  - name: docker_daemon
     image: docker:dind
+    volumes:
+      - name: docker_certs
+        path: /certs  # Monta il volume nei certificati del servizio
     environment:
-      DOCKER_TLS_CERTDIR: "/certs"  # Configurazione sicura per Docker-in-Docker
+      DOCKER_TLS_CERTDIR: "/certs"  # Abilita TLS
+      DOCKER_TLS_VERSION: "1.2"
 
 steps:
-  - name: costruzione-immagine
-    image: docker:latest
+  - name: build-image
+    image: docker:20.10
+    volumes:
+      - name: docker_certs
+        path: /certs/client  # Monta i certificati nel passo
+    environment:
+      DOCKER_HOST: tcp://docker_daemon:2376
+      DOCKER_TLS_VERIFY: 1
+      DOCKER_CERT_PATH: "/certs/client"
     commands:
       - docker build -t test:latest .
