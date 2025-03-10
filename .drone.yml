@@ -5,13 +5,5 @@ name: build
 steps:
   - name: "Costruzione immagine Docker"
     image: docker:cli
-    volumes:
-      - name: docker-sock
-        path: /var/run/docker.sock
     commands:
       - docker build -t test:latest .
-
-volumes:
-  - name: docker-sock
-    host:
-      path: /var/run/docker.sock
