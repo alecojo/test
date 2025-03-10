@@ -2,15 +2,14 @@ kind: pipeline
 type: docker
 name: build
 
+services:
+  - name: docker
+    image: docker:dind
+    environment:
+      DOCKER_TLS_CERTDIR: "/certs"  # Configurazione sicura per Docker-in-Docker
+
 steps:
   - name: costruzione-immagine
-    image: gcr.io/kaniko-project/executor:latest
-    environment:
-      DOCKER_CONFIG: "/kaniko/.docker"
+    image: docker:latest
     commands:
-      - mkdir -p /kaniko/.docker
-      - echo "{\"auths\":{}}" > /kaniko/.docker/config.json
-      - /kaniko/executor
-        --context=.
-        --dockerfile=Dockerfile
-        --destination=test:latest
+      - docker build -t test:latest .
