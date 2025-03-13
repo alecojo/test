@@ -1,12 +1,26 @@
 name: Test ARC Runner
 
-on: [push]
+on:
+  push:
+    branches:
+      - main # Puoi adattarlo alla tua configurazione di rami
 
 jobs:
   test:
-    runs-on: self-hosted
+    runs-on: self-hosted  # Esegui sul runner self-hosted che hai configurato (e.g., su MicroK8s ARC runner)
+    
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Print Hello
-        run: echo "Hello from MicroK8s ARC runner!"
+        uses: actions/checkout@v3  # Step per fare il checkout del codice sorgente del repository
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2  # Configura Docker Buildx per la build dell'immagine
+
+      - name: Build Docker image
+        run: |
+          docker build -t test:latest .  # Crea l'immagine Docker
+
+      - name: Push Docker image (opzionale)
+        run: |
+          docker push test:latest  # Puoi aggiungere questa riga se desideri fare il push dell'immagine
+
