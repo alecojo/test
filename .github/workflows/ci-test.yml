@@ -1,0 +1,13 @@
+name: Test Self-Hosted Runner
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # consente di avviare manualmente il workflow
+
+jobs:
+  test:
+    runs-on: self-hosted  # oppure specifica un'etichetta se hai configurato dei label specifici
+    steps:
+      - name: Esegui comando di test
+        run: echo "Hello, world! Il runner self-hosted funziona correttamente."
