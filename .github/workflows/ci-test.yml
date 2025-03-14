@@ -1,4 +1,4 @@
-name: Build, Push e Deploy in Locale
+name: Build, Push and Deploy
 
 on:
   push:
@@ -9,20 +9,20 @@ jobs:
   build-push-deploy:
     runs-on: self-hosted
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Login to Local Harbor
+      - name: Docker Login to Local Registry
         run: |
-          echo "${{ secrets.Harbor12345 }}" | docker login localhost:8080 -u "${{ secrets.admin }}" --password-stdin
+          echo "${{ secrets.Harbor12345 }}" | docker login localhost -u "${{ secrets.admin }}" --password-stdin
 
       - name: Build Docker Image
         run: |
-          docker build -t localhost:8080/myproject/myapp:latest .
+          docker build -t localhost/myproject/myapp:latest .
 
-      - name: Push Docker Image to Harbor
+      - name: Push Docker Image to Local Registry
         run: |
-          docker push localhost:8080/myproject/myapp:latest
+          docker push localhost/myproject/myapp:latest
 
       - name: Deploy on microk8s
         run: |

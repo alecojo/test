@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: myapp
-        image: localhost:8080/myproject/myapp:latest
+        image: localhost/myproject/myapp:latest
         ports:
         - containerPort: 80
 ---
