@@ -37,5 +37,5 @@ jobs:
 
       - name: Deploy to microk8s
         run: |
-          kubectl set image deployment/app-deployment app=${{ secrets.HARBOR_REGISTRY }}/namespace/app:${{ github.sha }} --record
+          kubectl set image deployment/app-deployment app=${{ secrets.localhost }}/namespace/app:${{ github.sha }} --record
           kubectl rollout status deployment/app-deployment
