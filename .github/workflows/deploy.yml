@@ -13,19 +13,20 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v3
 
+    - name: Login to Harbor via Ngrok
+      run: |
+        echo "${{ secrets.HARBOR_PASSWORD }}" | docker login 33af-92-242-173-10.ngrok-free.app -u "${{ secrets.HARBOR_USER }}" --password-stdin
+
     - name: Build Docker Image
       run: |
-        docker build -t localhost:8080/myrepo/myapp:${{ github.sha }} .
-    
-    - name: Login to Harbor
-      run: |
-        echo "${{ secrets.HARBOR_PASSWORD }}" | docker login localhost:8080 -u "${{ secrets.HARBOR_USER }}" --password-stdin
+        docker build -t 33af-92-242-173-10.ngrok-free.app/myrepo/myapp:${{ github.sha }} .
 
-    - name: Push to Harbor
+    - name: Push Docker Image to Harbor
       run: |
-        docker push localhost:8080/myrepo/myapp:${{ github.sha }}
+        docker push 33af-92-242-173-10.ngrok-free.app/myrepo/myapp:${{ github.sha }}
 
     - name: Deploy to MicroK8s using Helm
       run: |
         helm upgrade --install myapp ./mychart --namespace mynamespace \
+          --set image.repository=33af-92-242-173-10.ngrok-free.app/myrepo/myapp \
           --set image.tag=${{ github.sha }}
