@@ -1,13 +1,29 @@
-name: Test Self-Hosted Runner
+name: Build, Push e Deploy in Locale
 
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:  # consente di avviare manualmente il workflow
+  workflow_dispatch:
 
 jobs:
-  test:
-    runs-on: self-hosted  # oppure specifica un'etichetta se hai configurato dei label specifici
+  build-push-deploy:
+    runs-on: self-hosted
     steps:
-      - name: Esegui comando di test
-        run: echo "Hello, world! Il runner self-hosted funziona correttamente."
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Login to Local Harbor
+        run: |
+          echo "${{ secrets.Harbor12345 }}" | docker login localhost:8080 -u "${{ secrets.admin }}" --password-stdin
+
+      - name: Build Docker Image
+        run: |
+          docker build -t localhost:8080/myproject/myapp:latest .
+
+      - name: Push Docker Image to Harbor
+        run: |
+          docker push localhost:8080/myproject/myapp:latest
+
+      - name: Deploy on microk8s
+        run: |
+          microk8s kubectl apply -f deployment.yaml
