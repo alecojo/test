@@ -15,9 +15,7 @@ jobs:
 
       - name: Login a Harbor
         run: |
-          docker login ${{ secrets.localhost }} \
-            -u ${{ secrets.admin }} \
-            -p ${{ secrets.Harbor12345 }}
+          echo "${{ secrets.Harbor12345 }}" | docker login ${{ secrets.localhost }} -u ${{ secrets.admin }} --password-stdin
 
       - name: Build Docker image
         run: |
