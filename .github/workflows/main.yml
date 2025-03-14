@@ -1,0 +1,41 @@
+name: Build, Push & Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  # Imposta il nome dell'immagine usando l'URL di Harbor, il percorso del progetto e l'hash del commit
+  IMAGE_NAME: ${{ secrets.localhost }}/myproject/myapp:${{ github.sha }}
+
+jobs:
+  build:
+    runs-on: self-hosted  # Assicurati che il runner usato abbia gli strumenti necessari
+    steps:
+      - name: Checkout del codice
+        uses: actions/checkout@v3
+
+      - name: Configura Buildx (facoltativo, per build multiarch)
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login a Harbor
+        run: |
+          docker login ${{ secrets.localhost }} -u ${{ secrets.admin }} -p ${{ secrets.Harbor12345 }}
+
+      - name: Build Docker image
+        run: |
+          docker build -t $IMAGE_NAME .
+
+      - name: Push Docker image su Harbor
+        run: |
+          docker push $IMAGE_NAME
+
+      - name: Deploy su MicroK8s con Helm
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Assicurati che il contesto kubectl punti al cluster MicroK8s (configura KUBECONFIG se necessario)
+          helm upgrade --install myapp ./helm-chart \
+            --set image.repository=${{ secrets.localhost }}/myproject/myapp \
+            --set image.tag=${IMAGE_TAG}
