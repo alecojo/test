@@ -1,26 +1,41 @@
-name: Test ARC Runner
+name: Build, Push and Deploy
 
 on:
   push:
     branches:
-      - main # Puoi adattarlo alla tua configurazione di rami
+      - main  # Modifica se necessario
 
 jobs:
-  test:
-    runs-on: self-hosted  # Esegui sul runner self-hosted che hai configurato (e.g., su MicroK8s ARC runner)
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3  # Step per fare il checkout del codice sorgente del repository
+  build_push_deploy:
+    runs-on: self-hosted
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2  # Configura Docker Buildx per la build dell'immagine
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Login a Harbor
+        run: |
+          docker login ${{ secrets.localhost }} \
+            -u ${{ secrets.admin }} \
+            -p ${{ secrets.Harbor12345 }}
 
       - name: Build Docker image
         run: |
-          docker build -t test:latest .  # Crea l'immagine Docker
+          IMAGE_TAG=${{ secrets.localhost }}/namespace/app:${{ github.sha }}
+          docker build -t $IMAGE_TAG .
 
-      - name: Push Docker image (opzionale)
+      - name: Push Docker image
         run: |
-          docker push test:latest  # Puoi aggiungere questa riga se desideri fare il push dell'immagine
+          IMAGE_TAG=${{ secrets.localhost }}/namespace/app:${{ github.sha }}
+          docker push $IMAGE_TAG
 
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+          kubeconfig: ${{ secrets.KUBECONFIG }}
+
+      - name: Deploy to microk8s
+        run: |
+          kubectl set image deployment/app-deployment app=${{ secrets.HARBOR_REGISTRY }}/namespace/app:${{ github.sha }} --record
+          kubectl rollout status deployment/app-deployment
