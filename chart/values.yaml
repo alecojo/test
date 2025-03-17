@@ -1,0 +1,7 @@
+image:
+  repository: harbor.local/myproject/myapp  # Personalizza se necessario
+  tag: latest
+
+service:
+  type: ClusterIP
+  port: 80

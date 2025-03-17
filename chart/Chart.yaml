@@ -1,0 +1,4 @@
+apiVersion: v2
+name: myapp
+description: Helm chart per il deploy dell'app su MicroK8s
+version: 0.1.0
