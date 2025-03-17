@@ -1,0 +1,29 @@
+name: CI/CD locale con ARC
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-push-deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout codice
+        uses: actions/checkout@v4
+
+      - name: Docker login su Harbor
+        run: docker login localhost:8080 -u admin -p Harbor12345
+
+      - name: Build immagine Docker
+        run: docker build -t localhost:8080/library/progetto-cicd:${{ github.sha }} .
+
+      - name: Push immagine su Harbor
+        run: docker push localhost:8080/library/progetto-cicd:${{ github.sha }}
+
+      - name: Deploy con Helm su MicroK8s
+        run: |
+          helm upgrade --install progetto-cicd ./helm-chart \
+            --set image.repository=localhost:8080/library/progetto-cicd \
+            --set image.tag=${{ github.sha }}
