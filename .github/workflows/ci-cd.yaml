@@ -13,8 +13,8 @@ jobs:
       - name: Checkout codice
         uses: actions/checkout@v4
 
-      - name: Docker login su Harbor
-        run: echo "Harbor12345" | docker login 192.168.19.107:8080 -u admin --password-stdin
+      - name: Docker login su Harbor (HTTP)
+        run: echo "Harbor12345" | docker login http://192.168.19.107:8080 -u admin --password-stdin
 
       - name: Build immagine Docker
         run: docker build -t 192.168.19.107:8080/library/progetto-cicd:${{ github.sha }} .
