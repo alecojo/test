@@ -1,0 +1,26 @@
+name: Build, Push, Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-push-deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to Harbor
+        run: echo "${{ secrets.HARBOR_PASSWORD }}" | docker login 192.168.19.107:8080 -u ${{ secrets.HARBOR_USER }} --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t 192.168.19.107:8080/myproject/myapp:latest .
+
+      - name: Push Docker image
+        run: docker push 192.168.19.107:8080/myproject/myapp:latest
+
+      - name: Deploy to MicroK8s
+        run: sudo microk8s kubectl --kubeconfig=/var/snap/microk8s/current/credentials/client.config apply -f k8s/deployment.yaml
