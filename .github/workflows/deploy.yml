@@ -1,5 +1,3 @@
-# .github/workflows/ci-cd.yaml
-
 name: CI/CD to Harbor & MicroK8s via Helm
 
 on:
@@ -16,13 +14,13 @@ jobs:
 
       # Login su Harbor
       - name: Login to Harbor
-        run: echo "${{ secrets.HARBOR_PASSWORD }}" | docker login 192.168.19.107:8080 -u admin --password-stdin
+        run: echo "${{ secrets.HARBOR_PASSWORD }}" | docker login http://192.168.19.107:8080 -u admin --password-stdin
 
-      # Build Docker
-      - name: Build Docker Image
+      # Build Docker Image
+      - name: Build and Push Docker Image
         run: |
           docker build -t 192.168.19.107:8080/myproject/myapp:${{ github.sha }} .
-          docker push 192.168.19.107:8080/myproject/myapp:${{ github.sha }}
+          sudo docker push 192.168.19.107:8080/myproject/myapp:${{ github.sha }}
 
       # Imposta kubeconfig per MicroK8s
       - name: Setup kubeconfig
@@ -31,7 +29,7 @@ jobs:
           sudo microk8s config > $HOME/.kube/config
           sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
-      # Helm deploy su MicroK8s
+      # Deploy con Helm su MicroK8s
       - name: Deploy with Helm
         run: |
           sudo microk8s helm3 upgrade myapp ./helm-chart --install \
