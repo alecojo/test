@@ -12,26 +12,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Login su Harbor
+      # 🔐 Login a Harbor (usando HTTP e segreto)
       - name: Login to Harbor
         run: echo "${{ secrets.HARBOR_PASSWORD }}" | docker login http://192.168.19.107:8080 -u admin --password-stdin
 
-      # Build Docker Image
+      # 🐳 Build e push dell'immagine Docker su Harbor
       - name: Build and Push Docker Image
         run: |
           docker build -t 192.168.19.107:8080/myproject/myapp:${{ github.sha }} .
-          sudo docker push 192.168.19.107:8080/myproject/myapp:${{ github.sha }}
+          docker push 192.168.19.107:8080/myproject/myapp:${{ github.sha }}
 
-      # Imposta kubeconfig per MicroK8s
+      # ⚙️ Setup del kubeconfig (preso dal secret GitHub)
       - name: Setup kubeconfig
         run: |
           mkdir -p $HOME/.kube
-          sudo microk8s config > $HOME/.kube/config
-          sudo chown $(id -u):$(id -g) $HOME/.kube/config
+          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
 
-      # Deploy con Helm su MicroK8s
+      # 🚀 Deploy su MicroK8s tramite Helm
       - name: Deploy with Helm
         run: |
-          sudo microk8s helm3 upgrade myapp ./helm-chart --install \
+          helm upgrade --install myapp ./helm-chart \
             --set image.repository=192.168.19.107:8080/myproject/myapp \
             --set image.tag=${{ github.sha }}
