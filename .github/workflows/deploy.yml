@@ -1,4 +1,6 @@
-name: Build, Push, Deploy
+# .github/workflows/ci-cd.yaml
+
+name: CI/CD to Harbor & MicroK8s via Helm
 
 on:
   push:
@@ -10,17 +12,28 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Log in to Harbor
-        run: echo "${{ secrets.HARBOR_PASSWORD }}" | docker login 192.168.19.107:8080 -u ${{ secrets.HARBOR_USER }} --password-stdin
+      # Login su Harbor
+      - name: Login to Harbor
+        run: echo "${{ secrets.HARBOR_PASSWORD }}" | docker login 192.168.19.107:8080 -u admin --password-stdin
 
-      - name: Build Docker image
-        run: docker build -t 192.168.19.107:8080/myproject/myapp:latest .
+      # Build Docker
+      - name: Build Docker Image
+        run: |
+          docker build -t 192.168.19.107:8080/myproject/myapp:${{ github.sha }} .
+          docker push 192.168.19.107:8080/myproject/myapp:${{ github.sha }}
 
-      - name: Push Docker image
-        run: docker push 192.168.19.107:8080/myproject/myapp:latest
+      # Imposta kubeconfig per MicroK8s
+      - name: Setup kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          sudo microk8s config > $HOME/.kube/config
+          sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
-      - name: Deploy to MicroK8s
-        run: sudo microk8s kubectl --kubeconfig=/var/snap/microk8s/current/credentials/client.config apply -f k8s/deployment.yaml
+      # Helm deploy su MicroK8s
+      - name: Deploy with Helm
+        run: |
+          sudo microk8s helm3 upgrade myapp ./helm-chart --install \
+            --set image.repository=192.168.19.107:8080/myproject/myapp \
+            --set image.tag=${{ github.sha }}
