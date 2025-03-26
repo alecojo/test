@@ -12,23 +12,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 🔐 Login a Harbor (usando HTTP e segreto)
+      # 🔐 Login a Harbor (porta 8080)
       - name: Login to Harbor
         run: echo "${{ secrets.HARBOR_PASSWORD }}" | docker login http://192.168.19.107:8080 -u admin --password-stdin
 
-      # 🐳 Build e push dell'immagine Docker su Harbor
+      # 🐳 Build e push immagine su Harbor
       - name: Build and Push Docker Image
         run: |
           docker build -t 192.168.19.107:8080/myproject/myapp:${{ github.sha }} .
           docker push 192.168.19.107:8080/myproject/myapp:${{ github.sha }}
 
-      # ⚙️ Setup del kubeconfig (preso dal secret GitHub)
+      # ⚙️ Setup kubeconfig per MicroK8s (base64 encoded nel secret)
       - name: Setup kubeconfig
         run: |
           mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
 
-      # 🚀 Deploy su MicroK8s tramite Helm
+      # 🚀 Deploy con Helm
       - name: Deploy with Helm
         run: |
           helm upgrade --install myapp ./helm-chart \
